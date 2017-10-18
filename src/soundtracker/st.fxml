@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.GridPane?>
+<GridPane alignment="center"
+          hgap="10"
+          vgap="10"
+          xmlns="http://javafx.com/javafx/8.0.92"
+          xmlns:fx="http://javafx.com/fxml/1"
+          fx:controller="soundtracker.Controller"
+          stylesheets="/soundtracker/st.css">
+    <Button text="Begin search" onAction="#beginSearch"/>
+    <Label GridPane.rowIndex="1" fx:id="searchMusic"/>
+</GridPane>
