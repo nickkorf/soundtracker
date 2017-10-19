@@ -1,5 +1,6 @@
 package soundtracker;
 
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.scene.control.Label;
 import javafx.stage.DirectoryChooser;
@@ -19,6 +20,7 @@ public class Controller {
     public DirectoryChooser chooser;
     private List<String> fileNames;
     private Stage stage;
+    volatile String labelText;
     public enum PathSeparator
     {
         SLASH( "/" ),
@@ -46,17 +48,38 @@ public class Controller {
         {
             String fileName = rootDirectory.getAbsolutePath() + PathSeparator.BACKSLASH.getValue() + "output.txt";
             Path file = Paths.get(fileName);
-            searchDirectory(rootDirectory);
+            long startSearch = System.currentTimeMillis();
 
-            try
-            {
-                Files.write( file, fileNames, Charset.forName( "UTF-8" ) );
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
-            searchMusic.setText( "Search completed!" );
+            labelText = "Search in progress!";
+            searchMusic.setText( labelText );
+            Task <Void> task = new Task<Void>() {
+                @Override public Void call() throws InterruptedException
+                {
+                    Controller.this.searchDirectory(rootDirectory);
+                    long stopSearch = System.currentTimeMillis();
+                    try
+                    {
+                        Files.write(file, fileNames, Charset.forName("UTF-8"));
+
+                    } catch (IOException e)
+                    {
+                        e.printStackTrace();
+                    }
+                    long stopWrite = System.currentTimeMillis();
+                    System.out.println("Search duration: " + ((stopSearch - startSearch) / 1000));
+                    System.out.println("Full duration: " + ((stopWrite - startSearch) / 1000));
+                    labelText = "Search completed!";
+                    return null;
+                }
+            };
+            searchMusic.textProperty().bind(task.messageProperty());
+            task.setOnSucceeded(e -> {
+                searchMusic.textProperty().unbind();
+                // this message will be seen.
+                searchMusic.setText(labelText);
+            });
+            Thread thread = new Thread(task);
+            thread.start();
         }
         else
         {
