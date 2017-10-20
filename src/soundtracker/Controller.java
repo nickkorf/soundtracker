@@ -41,12 +41,14 @@ public class Controller {
     public void beginSearch(ActionEvent actionEvent)
     {
         chooser = new DirectoryChooser();
-        chooser.setTitle( "Select root directory" );
+        chooser.setTitle( "Select search directory" );
         fileNames = new ArrayList<String>();
-        File rootDirectory = chooser.showDialog( stage.getScene().getWindow() );
-        if ( rootDirectory != null )
+        File searchDirectory = chooser.showDialog( stage.getScene().getWindow() );
+        chooser.setTitle( "Select store directory" );
+        File storeDirectory = chooser.showDialog( stage.getScene().getWindow() );
+        if ( searchDirectory != null )
         {
-            String fileName = rootDirectory.getAbsolutePath() + PathSeparator.BACKSLASH.getValue() + "library.txt";
+            String fileName = storeDirectory.getAbsolutePath() + PathSeparator.BACKSLASH.getValue() + "library.txt";
             Path file = Paths.get(fileName);
             long startSearch = System.currentTimeMillis();
 
@@ -54,17 +56,18 @@ public class Controller {
             wait.setText("Search in progress!");
             wait.setVisible(true);
 
-            Task <Void> task = new Task<Void>() {
+            Task <Void> task = new Task<Void>()
+            {
                 @Override public Void call() throws InterruptedException
                 {
-                    fileNames.add(rootDirectory.getAbsolutePath());
-                    Controller.this.searchDirectory(rootDirectory);
+                    fileNames.add(searchDirectory.getAbsolutePath());
+                    Controller.this.searchDirectory(searchDirectory);
                     long stopSearch = System.currentTimeMillis();
                     try
                     {
                         Files.write(file, fileNames, Charset.forName("UTF-8"));
-
-                    } catch (IOException e)
+                    }
+                    catch (IOException e)
                     {
                         e.printStackTrace();
                     }
@@ -92,12 +95,12 @@ public class Controller {
 
     private void searchDirectory(File file)
     {
-        fileNames.add("--------------------");
+        //fileNames.add("--------------------");
         if ( file.listFiles() != null)
         {
             for (File f : file.listFiles() )
             {
-                if (f.isDirectory())
+                if (f.isDirectory() && f.canRead())
                 {
                     searchDirectory(f);
                 }
