@@ -11,5 +11,6 @@
           fx:controller="soundtracker.Controller"
           stylesheets="/soundtracker/st.css">
     <Button text="Begin search" onAction="#beginSearch"/>
-    <Label GridPane.rowIndex="1" fx:id="searchMusic"/>
+    <Label GridPane.rowIndex="1" fx:id="wait"/>
+    <Label GridPane.rowIndex="2" fx:id="searchMusic"/>
 </GridPane>

@@ -21,7 +21,7 @@ public class Controller {
     private List<String> fileNames;
     private Stage stage;
     volatile String labelText;
-    public enum PathSeparator
+    private enum PathSeparator
     {
         SLASH( "/" ),
         BACKSLASH( "\\" );
@@ -46,15 +46,18 @@ public class Controller {
         File rootDirectory = chooser.showDialog( stage.getScene().getWindow() );
         if ( rootDirectory != null )
         {
-            String fileName = rootDirectory.getAbsolutePath() + PathSeparator.BACKSLASH.getValue() + "output.txt";
+            String fileName = rootDirectory.getAbsolutePath() + PathSeparator.BACKSLASH.getValue() + "library.txt";
             Path file = Paths.get(fileName);
             long startSearch = System.currentTimeMillis();
 
-            labelText = "Search in progress!";
-            searchMusic.setText( labelText );
+            Label wait = (Label) stage.getScene().lookup("#wait");
+            wait.setText("Search in progress!");
+            wait.setVisible(true);
+
             Task <Void> task = new Task<Void>() {
                 @Override public Void call() throws InterruptedException
                 {
+                    fileNames.add(rootDirectory.getAbsolutePath());
                     Controller.this.searchDirectory(rootDirectory);
                     long stopSearch = System.currentTimeMillis();
                     try
@@ -75,7 +78,6 @@ public class Controller {
             searchMusic.textProperty().bind(task.messageProperty());
             task.setOnSucceeded(e -> {
                 searchMusic.textProperty().unbind();
-                // this message will be seen.
                 searchMusic.setText(labelText);
             });
             Thread thread = new Thread(task);
@@ -90,8 +92,7 @@ public class Controller {
 
     private void searchDirectory(File file)
     {
-        String fileName = file.getAbsolutePath();
-        fileNames.add(fileName);
+        fileNames.add("--------------------");
         if ( file.listFiles() != null)
         {
             for (File f : file.listFiles() )
@@ -102,7 +103,13 @@ public class Controller {
                 }
                 else if (f.isFile())
                 {
-                    fileNames.add(f.getAbsolutePath());
+                    if (f.getName().contains(".mp3") || f.getName().contains(".wav") || f.getName().contains(".aif")
+                        || f.getName().contains(".cda") || f.getName().contains(".mid") || f.getName().contains(".midi")
+                        || f.getName().contains(".mpa") || f.getName().contains(".ogg") || f.getName().contains(".wma")
+                        || f.getName().contains(".wpl"))
+                    {
+                        fileNames.add(f.getAbsolutePath());
+                    }
                 }
             }
         }
